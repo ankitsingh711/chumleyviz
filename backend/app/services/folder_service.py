@@ -8,12 +8,6 @@ from app.schemas.folder import FolderCreate, FolderRead, FolderUpdate
 
 def list_folders(db: Session) -> list[FolderRead]:
     folders = db.query(Folder).order_by(Folder.name.asc()).all()
-    counts = {
-        folder_id: count
-        for folder_id, count in db.query(Dashboard.folder_id, Dashboard.id)
-        .filter(Dashboard.folder_id.isnot(None))
-        .all()
-    }
 
     results: list[FolderRead] = []
     for folder in folders:
