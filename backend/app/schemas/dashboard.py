@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -10,12 +10,12 @@ class DashboardWidget(BaseModel):
     id: str
     kind: Literal["metric", "trend", "bar", "table", "note"]
     title: str
-    value: str | None = None
-    delta: str | None = None
-    body: str | None = None
-    series: list[int] | None = None
-    columns: list[str] | None = None
-    rows: list[list[str]] | None = None
+    value: Optional[str] = None
+    delta: Optional[str] = None
+    body: Optional[str] = None
+    series: Optional[list[int]] = None
+    columns: Optional[list[str]] = None
+    rows: Optional[list[list[str]]] = None
 
 
 class DashboardRead(BaseModel):
@@ -28,11 +28,11 @@ class DashboardRead(BaseModel):
     category: str
     preview_tone: str
     widget_count: int
-    folder_id: str | None = None
+    folder_id: Optional[str] = None
     widgets: list[DashboardWidget]
     created_at: datetime
     updated_at: datetime
 
 
 class DashboardUpdate(BaseModel):
-    folder_id: str | None = Field(default=None)
+    folder_id: Optional[str] = Field(default=None)

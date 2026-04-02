@@ -50,7 +50,7 @@ chumleyviz/
 
 The reference login page is implemented as a Microsoft SSO-style demo flow. The backend seeds one demo user:
 
-- Email: `microsoft@aspect.local`
+- Email: `microsoft@aspectdemo.com`
 - Password: `Aspect@12345`
 
 The frontend login page uses the SSO-style button and signs in through `POST /login` with the `microsoft_sso` provider payload.

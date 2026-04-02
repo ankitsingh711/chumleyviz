@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -8,13 +9,13 @@ from pydantic import BaseModel, ConfigDict, Field
 class FolderCreate(BaseModel):
     name: str = Field(min_length=2, max_length=120)
     color: str = Field(default="#6C4DFF", max_length=32)
-    description: str | None = Field(default=None, max_length=255)
+    description: Optional[str] = Field(default=None, max_length=255)
 
 
 class FolderUpdate(BaseModel):
-    name: str | None = Field(default=None, min_length=2, max_length=120)
-    color: str | None = Field(default=None, max_length=32)
-    description: str | None = Field(default=None, max_length=255)
+    name: Optional[str] = Field(default=None, min_length=2, max_length=120)
+    color: Optional[str] = Field(default=None, max_length=32)
+    description: Optional[str] = Field(default=None, max_length=255)
 
 
 class FolderRead(BaseModel):
@@ -23,7 +24,7 @@ class FolderRead(BaseModel):
     id: str
     name: str
     color: str
-    description: str | None = None
+    description: Optional[str] = None
     dashboard_count: int = 0
     created_at: datetime
     updated_at: datetime

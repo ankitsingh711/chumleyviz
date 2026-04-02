@@ -49,7 +49,7 @@ export function Sidebar() {
         <div className="sidebar__user">
           <span className="sidebar__user-label">Signed in as</span>
           <strong>{user?.fullName ?? 'Analyst'}</strong>
-          <span>{user?.email ?? 'microsoft@aspect.local'}</span>
+          <span>{user?.email ?? 'microsoft@aspectdemo.com'}</span>
         </div>
         <Button variant="secondary" onClick={logout}>
           Sign out

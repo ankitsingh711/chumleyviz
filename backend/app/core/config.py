@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 480
     database_url: str = "sqlite:///./chumleyviz.db"
     cors_origins: list[str] = ["http://localhost:5173"]
-    demo_sso_email: str = "microsoft@aspect.local"
+    demo_sso_email: str = "microsoft@aspectdemo.com"
     demo_sso_password: str = "Aspect@12345"
 
     model_config = SettingsConfigDict(

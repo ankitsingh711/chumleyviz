@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Optional
+
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
@@ -8,7 +10,7 @@ from app.models.user import User
 from app.schemas.auth import LoginRequest
 
 
-def authenticate_user(db: Session, payload: LoginRequest) -> User | None:
+def authenticate_user(db: Session, payload: LoginRequest) -> Optional[User]:
     settings = get_settings()
 
     if payload.provider == "microsoft_sso":

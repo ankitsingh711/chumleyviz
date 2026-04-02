@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Optional
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -8,7 +10,7 @@ from app.models.folder import Folder
 from app.schemas.dashboard import DashboardUpdate
 
 
-def list_dashboards(db: Session, folder_id: str | None = None) -> list[Dashboard]:
+def list_dashboards(db: Session, folder_id: Optional[str] = None) -> list[Dashboard]:
     query = db.query(Dashboard)
     if folder_id == "unassigned":
         query = query.filter(Dashboard.folder_id.is_(None))

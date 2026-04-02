@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+from typing import Optional
+
 from pydantic import BaseModel, ConfigDict, EmailStr, model_validator
 
 
 class LoginRequest(BaseModel):
-    email: EmailStr | None = None
-    password: str | None = None
-    provider: str | None = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+    provider: Optional[str] = None
 
     @model_validator(mode="after")
     def validate_login(self) -> "LoginRequest":

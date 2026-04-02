@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Optional
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -14,7 +16,7 @@ router = APIRouter(tags=["dashboards"])
 
 @router.get("/dashboards", response_model=list[DashboardRead])
 def get_dashboards(
-    folder_id: str | None = None,
+    folder_id: Optional[str] = None,
     db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
 ) -> list[DashboardRead]:

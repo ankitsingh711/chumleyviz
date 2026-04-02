@@ -15,3 +15,4 @@ coverage
 backend/chumleyviz.db
 backend/*.db
 frontend/.vite
+*.tsbuildinfo
