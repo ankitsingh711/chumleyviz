@@ -1,0 +1,13 @@
+{
+  "name": "chumleyviz",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "cd backend && uvicorn app.main:app --reload --port 8000",
+    "build": "npm --prefix frontend run build",
+    "lint": "npm --prefix frontend run lint",
+    "test:frontend": "npm --prefix frontend run test",
+    "test:backend": "cd backend && pytest"
+  }
+}
