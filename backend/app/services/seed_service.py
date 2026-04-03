@@ -10,15 +10,35 @@ from app.models.user import User
 def ensure_seed_data(db: Session) -> None:
     settings = get_settings()
 
-    if db.query(User).count() > 0:
-        return
+    admin_user = db.query(User).filter(User.email == settings.demo_sso_email).first()
+    if admin_user is None:
+        db.add(
+            User(
+                email=settings.demo_sso_email,
+                full_name="Aspect BI Operator",
+                password_hash=get_password_hash(settings.demo_sso_password),
+                role="admin",
+            )
+        )
+    else:
+        admin_user.role = "admin"
 
-    demo_user = User(
-        email=settings.demo_sso_email,
-        full_name="Aspect BI Operator",
-        password_hash=get_password_hash(settings.demo_sso_password),
-    )
-    db.add(demo_user)
+    viewer_user = db.query(User).filter(User.email == settings.demo_viewer_email).first()
+    if viewer_user is None:
+        db.add(
+            User(
+                email=settings.demo_viewer_email,
+                full_name="Aspect BI Viewer",
+                password_hash=get_password_hash(settings.demo_viewer_password),
+                role="viewer",
+            )
+        )
+    else:
+        viewer_user.role = "viewer"
+
+    if db.query(Folder).count() > 0 or db.query(Dashboard).count() > 0:
+        db.commit()
+        return
 
     folders = [
         Folder(

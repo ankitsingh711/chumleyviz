@@ -596,6 +596,21 @@ img {
   text-transform: uppercase;
 }
 
+.sidebar__role {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-top: 0.45rem;
+  padding: 0.18rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--sidebar-text-strong);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .workspace-main {
   padding: 1.5rem;
 }
@@ -604,6 +619,12 @@ img {
   display: flex;
   flex-direction: column;
   gap: 1.35rem;
+}
+
+.page-note {
+  padding: 0.95rem 1rem;
+  color: var(--text-muted);
+  border-style: dashed;
 }
 
 .page-header {
@@ -703,6 +724,12 @@ img {
   overflow: hidden;
 }
 
+.folder-card--grid {
+  display: flex;
+  flex-direction: column;
+  min-height: 272px;
+}
+
 .folder-card--list,
 .dashboard-card--list {
   display: grid;
@@ -710,6 +737,15 @@ img {
 }
 
 .folder-card__accent {
+  min-height: 10px;
+}
+
+.folder-card--grid .folder-card__accent {
+  width: 100%;
+  border-radius: 24px 24px 0 0;
+}
+
+.folder-card--list .folder-card__accent {
   min-height: 100%;
 }
 

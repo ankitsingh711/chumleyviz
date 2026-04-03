@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { Button } from '@/components/ui/Button';
@@ -9,12 +9,13 @@ import type { FolderMutationInput, FolderRecord } from '@/types/models';
 
 import { FolderCard } from '@/features/folders/components/FolderCard';
 import { FolderFormModal } from '@/features/folders/components/FolderFormModal';
+import { useSessionStore } from '@/features/auth/store/sessionStore';
 import { useWorkspaceStore } from '@/features/workspace/store/workspaceStore';
 
 export function FoldersDirectoryPage() {
-  const folders = useWorkspaceStore((state) =>
-    state.folderIds.map((folderId) => state.foldersById[folderId]),
-  );
+  const role = useSessionStore((state) => state.user?.role ?? 'viewer');
+  const folderIds = useWorkspaceStore((state) => state.folderIds);
+  const foldersById = useWorkspaceStore((state) => state.foldersById);
   const viewMode = useWorkspaceStore((state) => state.viewMode);
   const setViewMode = useWorkspaceStore((state) => state.setViewMode);
   const createFolder = useWorkspaceStore((state) => state.createFolder);
@@ -24,6 +25,11 @@ export function FoldersDirectoryPage() {
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [folderToEdit, setFolderToEdit] = useState<FolderRecord | null>(null);
+  const isAdmin = role === 'admin';
+  const folders = useMemo(
+    () => folderIds.map((folderId) => foldersById[folderId]).filter(Boolean),
+    [folderIds, foldersById],
+  );
 
   async function handleCreate(payload: FolderMutationInput) {
     try {
@@ -88,15 +94,23 @@ export function FoldersDirectoryPage() {
           <Button variant="secondary" onClick={toggleTheme}>
             Toggle theme
           </Button>
-          <Button onClick={() => setIsCreateOpen(true)}>New folder</Button>
+          {isAdmin ? <Button onClick={() => setIsCreateOpen(true)}>New folder</Button> : null}
         </div>
       </header>
+
+      {!isAdmin ? (
+        <div className="page-note panel">
+          Viewer role is read-only. Folder creation, rename, and deletion are limited to admins.
+        </div>
+      ) : null}
 
       {folders.length === 0 ? (
         <EmptyState
           title="No folders yet"
           description="Create a folder to start grouping dashboards by business function or team."
-          action={<Button onClick={() => setIsCreateOpen(true)}>Create the first folder</Button>}
+          action={
+            isAdmin ? <Button onClick={() => setIsCreateOpen(true)}>Create the first folder</Button> : undefined
+          }
         />
       ) : (
         <div className={`folder-grid folder-grid--${viewMode}`}>
@@ -105,6 +119,7 @@ export function FoldersDirectoryPage() {
               key={folder.id}
               folder={folder}
               viewMode={viewMode}
+              canManage={isAdmin}
               onRename={setFolderToEdit}
               onDelete={handleDelete}
             />
@@ -113,7 +128,7 @@ export function FoldersDirectoryPage() {
       )}
 
       <FolderFormModal
-        isOpen={isCreateOpen}
+        isOpen={isAdmin && isCreateOpen}
         title="Create folder"
         submitLabel="Create folder"
         onClose={() => setIsCreateOpen(false)}
@@ -121,7 +136,7 @@ export function FoldersDirectoryPage() {
       />
 
       <FolderFormModal
-        isOpen={folderToEdit !== null}
+        isOpen={isAdmin && folderToEdit !== null}
         title="Rename folder"
         submitLabel="Save changes"
         initialValues={

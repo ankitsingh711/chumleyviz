@@ -1,11 +1,13 @@
 export type ThemeMode = 'light' | 'dark';
 export type ViewMode = 'grid' | 'list';
 export type DashboardTone = 'violet' | 'teal' | 'orange' | 'blue' | 'slate' | string;
+export type UserRole = 'admin' | 'viewer';
 
 export interface UserSession {
   id: string;
   email: string;
   fullName: string;
+  role: UserRole;
 }
 
 export interface FolderRecord {

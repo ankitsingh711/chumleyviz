@@ -21,19 +21,54 @@ def test_login_and_resource_access(tmp_path: Path) -> None:
     from app.main import create_app
 
     with TestClient(create_app()) as client:
-        login_response = client.post("/login", json={"provider": "microsoft_sso"})
-        assert login_response.status_code == 200
+        admin_login_response = client.post("/login", json={"provider": "microsoft_sso"})
+        assert admin_login_response.status_code == 200
+        assert admin_login_response.json()["user"]["role"] == "admin"
 
-        access_token = login_response.json()["access_token"]
-        headers = {"Authorization": f"Bearer {access_token}"}
+        admin_token = admin_login_response.json()["access_token"]
+        admin_headers = {"Authorization": f"Bearer {admin_token}"}
 
-        folders_response = client.get("/folders", headers=headers)
-        dashboards_response = client.get("/dashboards", headers=headers)
+        folders_response = client.get("/folders", headers=admin_headers)
+        dashboards_response = client.get("/dashboards", headers=admin_headers)
+        create_folder_response = client.post(
+            "/folders",
+            json={"name": "New Admin Folder", "color": "#5C4CFF", "description": "admin-owned"},
+            headers=admin_headers,
+        )
 
         assert folders_response.status_code == 200
         assert dashboards_response.status_code == 200
+        assert create_folder_response.status_code == 201
         assert len(folders_response.json()) == 3
         assert len(dashboards_response.json()) >= 5
+
+        viewer_login_response = client.post(
+            "/login",
+            json={"email": "viewer@aspectdemo.com", "password": "Aspect@12345"},
+        )
+        assert viewer_login_response.status_code == 200
+        assert viewer_login_response.json()["user"]["role"] == "viewer"
+
+        viewer_token = viewer_login_response.json()["access_token"]
+        viewer_headers = {"Authorization": f"Bearer {viewer_token}"}
+
+        viewer_folders_response = client.get("/folders", headers=viewer_headers)
+        viewer_dashboards_response = client.get("/dashboards", headers=viewer_headers)
+        viewer_create_response = client.post(
+            "/folders",
+            json={"name": "Blocked Folder", "color": "#FF7A59", "description": "viewer-owned"},
+            headers=viewer_headers,
+        )
+        viewer_patch_response = client.patch(
+            f"/dashboards/{dashboards_response.json()[0]['id']}",
+            json={"folder_id": None},
+            headers=viewer_headers,
+        )
+
+        assert viewer_folders_response.status_code == 200
+        assert viewer_dashboards_response.status_code == 200
+        assert viewer_create_response.status_code == 403
+        assert viewer_patch_response.status_code == 403
 
     reset_database_state()
     clear_settings_cache()

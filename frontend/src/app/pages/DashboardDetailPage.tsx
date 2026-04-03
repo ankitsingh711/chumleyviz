@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 
 import { LoadingState } from '@/components/ui/LoadingState';
@@ -7,11 +8,15 @@ import { useWorkspaceStore } from '@/features/workspace/store/workspaceStore';
 export function DashboardDetailPage() {
   const { dashboardId } = useParams();
   const status = useWorkspaceStore((state) => state.status);
-  const dashboard = useWorkspaceStore((state) =>
-    dashboardId ? state.dashboardsById[dashboardId] ?? null : null,
+  const dashboardsById = useWorkspaceStore((state) => state.dashboardsById);
+  const foldersById = useWorkspaceStore((state) => state.foldersById);
+  const dashboard = useMemo(
+    () => (dashboardId ? dashboardsById[dashboardId] ?? null : null),
+    [dashboardId, dashboardsById],
   );
-  const folder = useWorkspaceStore((state) =>
-    dashboard?.folderId ? state.foldersById[dashboard.folderId] ?? null : null,
+  const folder = useMemo(
+    () => (dashboard?.folderId ? foldersById[dashboard.folderId] ?? null : null),
+    [dashboard, foldersById],
   );
 
   if (status === 'loading' && !dashboard) {

@@ -12,3 +12,4 @@ class User(TimestampMixin, Base):
     email = Column(String(255), unique=True, index=True, nullable=False)
     full_name = Column(String(255), nullable=False)
     password_hash = Column(String(255), nullable=False)
+    role = Column(String(32), nullable=False, default="admin", server_default="admin")

@@ -1,6 +1,6 @@
 from collections.abc import Generator
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import get_settings
@@ -36,7 +36,19 @@ def reset_database_state() -> None:
 def init_db() -> None:
     from app.models import dashboard, folder, user  # noqa: F401
 
-    Base.metadata.create_all(bind=get_engine())
+    engine = get_engine()
+    Base.metadata.create_all(bind=engine)
+
+    inspector = inspect(engine)
+    if not inspector.has_table("users"):
+        return
+
+    user_columns = {column["name"] for column in inspector.get_columns("users")}
+    with engine.begin() as connection:
+        if "role" not in user_columns:
+            connection.execute(text("ALTER TABLE users ADD COLUMN role VARCHAR(32) NOT NULL DEFAULT 'admin'"))
+
+        connection.execute(text("UPDATE users SET role = 'admin' WHERE role IS NULL OR role = ''"))
 
 
 def get_db() -> Generator[Session, None, None]:

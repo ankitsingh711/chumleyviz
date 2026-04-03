@@ -1,4 +1,5 @@
 import toast from 'react-hot-toast';
+import { useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -7,18 +8,17 @@ import { useThemeStore } from '@/theme/themeStore';
 import type { FolderMutationInput } from '@/types/models';
 
 import { DashboardOrganizerBoard } from '@/features/dashboards/components/DashboardOrganizerBoard';
+import { DashboardGrid } from '@/features/dashboards/components/DashboardGrid';
 import { FolderFormModal } from '@/features/folders/components/FolderFormModal';
+import { useSessionStore } from '@/features/auth/store/sessionStore';
 import { useWorkspaceStore } from '@/features/workspace/store/workspaceStore';
 
-import { useState } from 'react';
-
 export function AllDashboardsPage() {
-  const folders = useWorkspaceStore((state) =>
-    state.folderIds.map((folderId) => state.foldersById[folderId]),
-  );
-  const dashboards = useWorkspaceStore((state) =>
-    state.dashboardIds.map((dashboardId) => state.dashboardsById[dashboardId]),
-  );
+  const role = useSessionStore((state) => state.user?.role ?? 'viewer');
+  const folderIds = useWorkspaceStore((state) => state.folderIds);
+  const foldersById = useWorkspaceStore((state) => state.foldersById);
+  const dashboardIds = useWorkspaceStore((state) => state.dashboardIds);
+  const dashboardsById = useWorkspaceStore((state) => state.dashboardsById);
   const viewMode = useWorkspaceStore((state) => state.viewMode);
   const setViewMode = useWorkspaceStore((state) => state.setViewMode);
   const createFolder = useWorkspaceStore((state) => state.createFolder);
@@ -26,6 +26,15 @@ export function AllDashboardsPage() {
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const isAdmin = role === 'admin';
+  const folders = useMemo(
+    () => folderIds.map((folderId) => foldersById[folderId]).filter(Boolean),
+    [folderIds, foldersById],
+  );
+  const dashboards = useMemo(
+    () => dashboardIds.map((dashboardId) => dashboardsById[dashboardId]).filter(Boolean),
+    [dashboardIds, dashboardsById],
+  );
 
   async function handleCreateFolder(payload: FolderMutationInput) {
     try {
@@ -76,14 +85,31 @@ export function AllDashboardsPage() {
           <Button variant="secondary" onClick={toggleTheme}>
             Toggle theme
           </Button>
-          <Button onClick={() => setIsCreateOpen(true)}>Create folder</Button>
+          {isAdmin ? <Button onClick={() => setIsCreateOpen(true)}>Create folder</Button> : null}
         </div>
       </header>
+
+      {!isAdmin ? (
+        <div className="page-note panel">
+          Viewer role is read-only. You can open dashboards, but folder and dashboard organization is
+          restricted to admins.
+        </div>
+      ) : null}
 
       {dashboards.length === 0 ? (
         <EmptyState
           title="No dashboards loaded"
           description="The organizer will populate as soon as dashboards are available from the API."
+        />
+      ) : !isAdmin ? (
+        <DashboardGrid
+          dashboards={dashboards}
+          folders={folders}
+          viewMode={viewMode}
+          emptyTitle="No dashboards loaded"
+          emptyDescription="Dashboards will appear here once they are available."
+          canManage={false}
+          onMove={handleMove}
         />
       ) : (
         <DashboardOrganizerBoard

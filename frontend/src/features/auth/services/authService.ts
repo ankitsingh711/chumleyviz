@@ -7,6 +7,7 @@ function mapUser(user: ApiAuthResponse['user']): UserSession {
     id: user.id,
     email: user.email,
     fullName: user.full_name,
+    role: user.role,
   };
 }
 

@@ -5,7 +5,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
+from app.api.deps import get_current_admin, get_current_user
 from app.core.database import get_db
 from app.models.user import User
 from app.schemas.dashboard import DashboardRead, DashboardUpdate
@@ -29,7 +29,7 @@ def patch_dashboard(
     dashboard_id: str,
     payload: DashboardUpdate,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _: User = Depends(get_current_admin),
 ) -> DashboardRead:
     dashboard = dashboard_service.update_dashboard(db, dashboard_id, payload)
     return DashboardRead.model_validate(dashboard)

@@ -7,11 +7,18 @@ import type { FolderRecord, ViewMode } from '@/types/models';
 interface FolderCardProps {
   folder: FolderRecord;
   viewMode: ViewMode;
+  canManage?: boolean;
   onRename: (folder: FolderRecord) => void;
   onDelete: (folder: FolderRecord) => void;
 }
 
-export function FolderCard({ folder, viewMode, onRename, onDelete }: FolderCardProps) {
+export function FolderCard({
+  folder,
+  viewMode,
+  canManage = true,
+  onRename,
+  onDelete,
+}: FolderCardProps) {
   return (
     <article className={`folder-card panel folder-card--${viewMode}`}>
       <div className="folder-card__accent" style={{ backgroundColor: folder.color }} />
@@ -22,14 +29,20 @@ export function FolderCard({ folder, viewMode, onRename, onDelete }: FolderCardP
         </div>
         <div className="folder-card__title-row">
           <h3>{folder.name}</h3>
-          <div className="folder-card__actions">
-            <button type="button" className="icon-button" onClick={() => onRename(folder)}>
-              Rename
-            </button>
-            <button type="button" className="icon-button icon-button--danger" onClick={() => onDelete(folder)}>
-              Delete
-            </button>
-          </div>
+          {canManage ? (
+            <div className="folder-card__actions">
+              <button type="button" className="icon-button" onClick={() => onRename(folder)}>
+                Rename
+              </button>
+              <button
+                type="button"
+                className="icon-button icon-button--danger"
+                onClick={() => onDelete(folder)}
+              >
+                Delete
+              </button>
+            </div>
+          ) : null}
         </div>
         <p>{folder.description || 'No description added yet.'}</p>
         <div className="folder-card__footer">

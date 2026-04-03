@@ -1,7 +1,5 @@
 from functools import lru_cache
-from typing import Any
 
-from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,9 +9,11 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 480
     database_url: str = "sqlite:///./chumleyviz.db"
-    cors_origins: list[str] = ["http://localhost:5173"]
+    cors_origins: str = "http://localhost:5173"
     demo_sso_email: str = "microsoft@aspectdemo.com"
     demo_sso_password: str = "Aspect@12345"
+    demo_viewer_email: str = "viewer@aspectdemo.com"
+    demo_viewer_password: str = "Aspect@12345"
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -22,12 +22,9 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    @field_validator("cors_origins", mode="before")
-    @classmethod
-    def parse_origins(cls, value: Any) -> Any:
-        if isinstance(value, str):
-            return [origin.strip() for origin in value.split(",") if origin.strip()]
-        return value
+    @property
+    def cors_origins_list(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
 
 @lru_cache

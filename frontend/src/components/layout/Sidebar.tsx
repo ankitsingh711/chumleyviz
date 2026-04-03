@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
 
 import { BrandMark } from '@/components/ui/BrandMark';
@@ -6,11 +7,15 @@ import { useSessionStore } from '@/features/auth/store/sessionStore';
 import { useWorkspaceStore } from '@/features/workspace/store/workspaceStore';
 
 export function Sidebar() {
-  const folders = useWorkspaceStore((state) =>
-    state.folderIds.map((folderId) => state.foldersById[folderId]),
-  );
+  const folderIds = useWorkspaceStore((state) => state.folderIds);
+  const foldersById = useWorkspaceStore((state) => state.foldersById);
   const user = useSessionStore((state) => state.user);
   const logout = useSessionStore((state) => state.logout);
+  const folders = useMemo(
+    () => folderIds.map((folderId) => foldersById[folderId]).filter(Boolean),
+    [folderIds, foldersById],
+  );
+  const roleLabel = user?.role === 'admin' ? 'Admin' : 'Viewer';
 
   return (
     <aside className="sidebar">
@@ -50,6 +55,7 @@ export function Sidebar() {
           <span className="sidebar__user-label">Signed in as</span>
           <strong>{user?.fullName ?? 'Analyst'}</strong>
           <span>{user?.email ?? 'microsoft@aspectdemo.com'}</span>
+          <span className="sidebar__role">{roleLabel}</span>
         </div>
         <Button variant="secondary" onClick={logout}>
           Sign out

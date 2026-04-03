@@ -9,6 +9,7 @@ interface DashboardGridProps {
   viewMode: ViewMode;
   emptyTitle: string;
   emptyDescription: string;
+  canManage?: boolean;
   onMove: (dashboardId: string, folderId: string | null) => Promise<void>;
 }
 
@@ -18,6 +19,7 @@ export function DashboardGrid({
   viewMode,
   emptyTitle,
   emptyDescription,
+  canManage = true,
   onMove,
 }: DashboardGridProps) {
   if (dashboards.length === 0) {
@@ -32,6 +34,7 @@ export function DashboardGrid({
           dashboard={dashboard}
           folders={folders}
           viewMode={viewMode}
+          canManage={canManage}
           draggable={false}
           onMove={onMove}
         />

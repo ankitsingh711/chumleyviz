@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
+from app.api.deps import get_current_admin, get_current_user
 from app.core.database import get_db
 from app.models.user import User
 from app.schemas.folder import FolderCreate, FolderRead, FolderUpdate
@@ -22,7 +22,7 @@ def get_folders(
 def create_folder(
     payload: FolderCreate,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _: User = Depends(get_current_admin),
 ) -> FolderRead:
     folder = folder_service.create_folder(db, payload)
     return FolderRead.model_validate({**folder.__dict__, "dashboard_count": 0})
@@ -33,7 +33,7 @@ def patch_folder(
     folder_id: str,
     payload: FolderUpdate,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _: User = Depends(get_current_admin),
 ) -> FolderRead:
     folder = folder_service.update_folder(db, folder_id, payload)
     return FolderRead.model_validate({**folder.__dict__, "dashboard_count": len(folder.dashboards)})
@@ -43,7 +43,7 @@ def patch_folder(
 def remove_folder(
     folder_id: str,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    _: User = Depends(get_current_admin),
 ) -> Response:
     folder_service.delete_folder(db, folder_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -9,6 +9,7 @@ interface DashboardCardProps {
   folders: FolderRecord[];
   viewMode: ViewMode;
   draggable?: boolean;
+  canManage?: boolean;
   onMove: (dashboardId: string, folderId: string | null) => Promise<void> | void;
 }
 
@@ -17,19 +18,21 @@ export function DashboardCard({
   folders,
   viewMode,
   draggable = true,
+  canManage = true,
   onMove,
 }: DashboardCardProps) {
+  const canReorganize = canManage && draggable;
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: dashboard.id,
     data: {
       dashboardId: dashboard.id,
       folderId: dashboard.folderId,
     },
-    disabled: !draggable,
+    disabled: !canReorganize,
   });
 
   const style =
-    transform && draggable
+    transform && canReorganize
       ? {
           transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
         }
@@ -59,7 +62,7 @@ export function DashboardCard({
             </div>
             <h3>{dashboard.title}</h3>
           </div>
-          {draggable ? (
+          {canReorganize ? (
             <button type="button" className="drag-handle" aria-label="Drag dashboard" {...listeners} {...attributes}>
               ⋮⋮
             </button>
@@ -74,20 +77,22 @@ export function DashboardCard({
             <span>Updated {formatUpdatedAt(dashboard.updatedAt)}</span>
           </div>
           <div className="dashboard-card__actions">
-            <select
-              className="dashboard-card__select"
-              value={dashboard.folderId ?? 'unassigned'}
-              onChange={(event) =>
-                onMove(dashboard.id, event.target.value === 'unassigned' ? null : event.target.value)
-              }
-            >
-              <option value="unassigned">No folder</option>
-              {folders.map((folder) => (
-                <option key={folder.id} value={folder.id}>
-                  {folder.name}
-                </option>
-              ))}
-            </select>
+            {canManage ? (
+              <select
+                className="dashboard-card__select"
+                value={dashboard.folderId ?? 'unassigned'}
+                onChange={(event) =>
+                  onMove(dashboard.id, event.target.value === 'unassigned' ? null : event.target.value)
+                }
+              >
+                <option value="unassigned">No folder</option>
+                {folders.map((folder) => (
+                  <option key={folder.id} value={folder.id}>
+                    {folder.name}
+                  </option>
+                ))}
+              </select>
+            ) : null}
             <Link to={`/dashboards/${dashboard.id}`} className="dashboard-card__link">
               Open
             </Link>

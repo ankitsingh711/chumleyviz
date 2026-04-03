@@ -10,18 +10,18 @@ import type { FolderMutationInput } from '@/types/models';
 
 import { DashboardGrid } from '@/features/dashboards/components/DashboardGrid';
 import { FolderFormModal } from '@/features/folders/components/FolderFormModal';
+import { useSessionStore } from '@/features/auth/store/sessionStore';
 import { useWorkspaceStore } from '@/features/workspace/store/workspaceStore';
 
 export function FolderDetailPage() {
   const { folderId } = useParams();
   const navigate = useNavigate();
+  const role = useSessionStore((state) => state.user?.role ?? 'viewer');
   const status = useWorkspaceStore((state) => state.status);
-  const folders = useWorkspaceStore((state) =>
-    state.folderIds.map((id) => state.foldersById[id]),
-  );
-  const dashboards = useWorkspaceStore((state) =>
-    state.dashboardIds.map((id) => state.dashboardsById[id]),
-  );
+  const folderIds = useWorkspaceStore((state) => state.folderIds);
+  const foldersById = useWorkspaceStore((state) => state.foldersById);
+  const dashboardIds = useWorkspaceStore((state) => state.dashboardIds);
+  const dashboardsById = useWorkspaceStore((state) => state.dashboardsById);
   const renameFolder = useWorkspaceStore((state) => state.renameFolder);
   const deleteFolder = useWorkspaceStore((state) => state.deleteFolder);
   const moveDashboard = useWorkspaceStore((state) => state.moveDashboard);
@@ -30,6 +30,15 @@ export function FolderDetailPage() {
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
 
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const isAdmin = role === 'admin';
+  const folders = useMemo(
+    () => folderIds.map((id) => foldersById[id]).filter(Boolean),
+    [folderIds, foldersById],
+  );
+  const dashboards = useMemo(
+    () => dashboardIds.map((id) => dashboardsById[id]).filter(Boolean),
+    [dashboardIds, dashboardsById],
+  );
 
   const folder = folderId ? folders.find((item) => item.id === folderId) ?? null : null;
   const folderDashboards = useMemo(
@@ -117,14 +126,25 @@ export function FolderDetailPage() {
           <Button variant="secondary" onClick={toggleTheme}>
             Toggle theme
           </Button>
-          <Button variant="secondary" onClick={() => setIsEditOpen(true)}>
-            Rename
-          </Button>
-          <Button variant="danger" onClick={handleDelete}>
-            Delete folder
-          </Button>
+          {isAdmin ? (
+            <>
+              <Button variant="secondary" onClick={() => setIsEditOpen(true)}>
+                Rename
+              </Button>
+              <Button variant="danger" onClick={handleDelete}>
+                Delete folder
+              </Button>
+            </>
+          ) : null}
         </div>
       </header>
+
+      {!isAdmin ? (
+        <div className="page-note panel">
+          Viewer role is read-only. You can browse dashboards in this folder, but only admins can
+          reorganize them.
+        </div>
+      ) : null}
 
       <DashboardGrid
         dashboards={folderDashboards}
@@ -132,11 +152,12 @@ export function FolderDetailPage() {
         viewMode={viewMode}
         emptyTitle="No dashboards in this folder"
         emptyDescription="Move dashboards here from the organizer or use the folder picker on a dashboard card."
+        canManage={isAdmin}
         onMove={handleMove}
       />
 
       <FolderFormModal
-        isOpen={isEditOpen}
+        isOpen={isAdmin && isEditOpen}
         title="Rename folder"
         submitLabel="Save changes"
         initialValues={{
