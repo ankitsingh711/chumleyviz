@@ -4,6 +4,7 @@ import { getErrorMessage } from '@/lib/errors';
 import type { UserSession } from '@/types/models';
 
 import { loginWithMicrosoft } from '../services/authService';
+import { logoutFromMicrosoft } from '../services/msalService';
 import { clearStoredSession, readStoredSession, writeStoredSession } from './tokenStorage';
 
 type SessionStatus = 'idle' | 'loading' | 'authenticated';
@@ -55,5 +56,6 @@ export const useSessionStore = create<SessionState>((set) => ({
       status: 'idle',
       error: null,
     });
+    void logoutFromMicrosoft().catch(() => undefined);
   },
 }));

@@ -1,24 +1,19 @@
 from __future__ import annotations
 
-from typing import Literal, Optional
+from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, model_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 UserRole = Literal["admin", "viewer"]
 
 
 class LoginRequest(BaseModel):
-    email: Optional[EmailStr] = None
-    password: Optional[str] = None
-    provider: Optional[str] = None
+    email: EmailStr
+    password: str
 
-    @model_validator(mode="after")
-    def validate_login(self) -> "LoginRequest":
-        if self.provider:
-            return self
-        if not self.email or not self.password:
-            raise ValueError("Either provider or email/password credentials are required.")
-        return self
+
+class MicrosoftExchangeRequest(BaseModel):
+    access_token: str = Field(min_length=1)
 
 
 class UserRead(BaseModel):

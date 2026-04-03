@@ -13,3 +13,5 @@ class User(TimestampMixin, Base):
     full_name = Column(String(255), nullable=False)
     password_hash = Column(String(255), nullable=False)
     role = Column(String(32), nullable=False, default="admin", server_default="admin")
+    entra_object_id = Column(String(64), unique=True, index=True, nullable=True)
+    entra_tenant_id = Column(String(64), index=True, nullable=True)

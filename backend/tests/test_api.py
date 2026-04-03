@@ -11,17 +11,36 @@ def configure_test_environment(tmp_path: Path) -> None:
     test_db = tmp_path / "test.db"
     os.environ["DATABASE_URL"] = f"sqlite:///{test_db}"
     os.environ["SECRET_KEY"] = "test-secret"
+    os.environ["ADMIN_EMAILS"] = "ankit.singh@aspect.co.uk,microsoft@aspectdemo.com"
     clear_settings_cache()
     reset_database_state()
 
 
-def test_login_and_resource_access(tmp_path: Path) -> None:
+def test_login_and_resource_access(tmp_path: Path, monkeypatch) -> None:
     configure_test_environment(tmp_path)
 
     from app.main import create_app
+    from app.services import auth_service
+
+    monkeypatch.setattr(
+        auth_service,
+        "verify_microsoft_access_token",
+        lambda access_token: {
+            "aud": "a69d5fb3-99af-440f-b88d-01f4aa7a8db2",
+            "iss": "https://login.microsoftonline.com/93ce9c27-3bb2-4ef2-b686-1829de4f2584/v2.0",
+            "name": "Ankit Singh",
+            "oid": "entra-object-id-1",
+            "preferred_username": "ankit.singh@aspect.co.uk",
+            "scp": "access_as_user",
+            "tid": "93ce9c27-3bb2-4ef2-b686-1829de4f2584",
+        },
+    )
 
     with TestClient(create_app()) as client:
-        admin_login_response = client.post("/login", json={"provider": "microsoft_sso"})
+        admin_login_response = client.post(
+            "/auth/microsoft/exchange",
+            json={"access_token": "microsoft-access-token"},
+        )
         assert admin_login_response.status_code == 200
         assert admin_login_response.json()["user"]["role"] == "admin"
 

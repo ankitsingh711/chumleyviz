@@ -20,7 +20,7 @@ export function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar__brand">
-        <BrandMark compact />
+        <BrandMark compact inverted />
         <span className="sidebar__beta">dashboard manager</span>
       </div>
 

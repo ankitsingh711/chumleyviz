@@ -2,6 +2,8 @@ import apiClient from '@/services/api/client';
 import type { ApiAuthResponse } from '@/types/api';
 import type { UserSession } from '@/types/models';
 
+import { acquireMicrosoftAccessToken } from './msalService';
+
 function mapUser(user: ApiAuthResponse['user']): UserSession {
   return {
     id: user.id,
@@ -12,8 +14,10 @@ function mapUser(user: ApiAuthResponse['user']): UserSession {
 }
 
 export async function loginWithMicrosoft(): Promise<{ token: string; user: UserSession }> {
-  const { data } = await apiClient.post<ApiAuthResponse>('/login', {
-    provider: 'microsoft_sso',
+  const microsoftAccessToken = await acquireMicrosoftAccessToken();
+
+  const { data } = await apiClient.post<ApiAuthResponse>('/auth/microsoft/exchange', {
+    access_token: microsoftAccessToken,
   });
 
   return {

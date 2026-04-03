@@ -47,6 +47,17 @@ def init_db() -> None:
     with engine.begin() as connection:
         if "role" not in user_columns:
             connection.execute(text("ALTER TABLE users ADD COLUMN role VARCHAR(32) NOT NULL DEFAULT 'admin'"))
+        if "entra_object_id" not in user_columns:
+            connection.execute(text("ALTER TABLE users ADD COLUMN entra_object_id VARCHAR(64)"))
+        if "entra_tenant_id" not in user_columns:
+            connection.execute(text("ALTER TABLE users ADD COLUMN entra_tenant_id VARCHAR(64)"))
+
+        connection.execute(
+            text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_entra_object_id ON users (entra_object_id)")
+        )
+        connection.execute(
+            text("CREATE INDEX IF NOT EXISTS ix_users_entra_tenant_id ON users (entra_tenant_id)")
+        )
 
         connection.execute(text("UPDATE users SET role = 'admin' WHERE role IS NULL OR role = ''"))
 
